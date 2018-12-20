@@ -23,7 +23,7 @@ namespace Hermes.Protocol.Gpx.Controllers.Services
         public void Post(object data)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
-            if (data.GetType() != typeof(IUploadData)) throw new InvalidCastException();
+            if (data.GetType() != typeof(GpxData)) throw new InvalidCastException();
             var argument = new HermesProtocolEventArg();
             try
             {
@@ -55,7 +55,6 @@ namespace Hermes.Protocol.Gpx.Controllers.Services
                     argument.Exception = exception;
                 }
                 else 
-                if (exception.GetType() == typeof(Exception))
                 {
                     argument.Exception = exception;
                     _logger.Fatal(exception, exception.Message);

@@ -8,4 +8,6 @@ namespace Hermes.Protocol.Gpx.Controllers.Contracts
         
         public Exception Exception { get; set; }
     }
+
+    public delegate void ProcessorEvent(object sender, PointsProcessorEntArg arg);
 }
