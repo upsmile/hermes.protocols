@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace Hermes.Protocol.Gpx.Controllers.Services
+namespace Hermes.Protocol.Gpx.Controllers.Contracts
 {
     internal class GpxData : IUploadData
     {
