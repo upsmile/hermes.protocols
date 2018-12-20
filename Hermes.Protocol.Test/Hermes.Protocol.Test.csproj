@@ -30,6 +30,9 @@
     <None Update="Data\131890700909312893_1723776026.gpx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\131544183883686029_201950020.gpx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

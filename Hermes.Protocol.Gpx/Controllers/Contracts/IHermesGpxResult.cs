@@ -9,4 +9,11 @@ namespace Hermes.Protocol.Gpx.Controllers.Contracts
          Dictionary<DateTime,double> Dates { get; set; } 
          IUploadDataParams Params { get; set; }
      }
+
+    internal sealed class HermesGpxResult : IHermesGpxResult
+    {
+        public IEnumerable<TrackRouteStorage> Routes { get;set; }
+        public Dictionary<DateTime, double> Dates { get;set; }
+        public IUploadDataParams Params { get;set; }
+    }
 }

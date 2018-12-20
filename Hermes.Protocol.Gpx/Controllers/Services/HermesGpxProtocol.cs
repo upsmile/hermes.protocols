@@ -5,7 +5,7 @@ using Serilog;
 namespace Hermes.Protocol.Gpx.Controllers.Services
 {
     public delegate void ProcessorEvent(object sender, PointsProcessorEntArg arg);
-    
+
     public sealed class HermesGpxProtocol : IHermesProtocol, IDisposable
     {
         private readonly ILogger _logger;
@@ -28,33 +28,54 @@ namespace Hermes.Protocol.Gpx.Controllers.Services
             try
             {
                 var body = (IUploadData)data;
-                using (var processor = new WayPointsProcessor(_logger))
-                {
-                    processor.Processed += (sender, arg) =>
-                    {
-                        if (arg.Exception != null)
-                        {
-                            throw arg.Exception;
-                        }
-                        if (arg.Result != null)
-                        {
 
-                        }
-                        else
+                using (var parser = new GpxParser(_logger))
+                {
+                    parser.Parsed += (sender, arg) =>
+                    {
+                        arg.With(x => x.Exception.Do(exception =>
                         {
-                            throw new InvalidOperationException("результат обработки посещенных точек не существует");
-                        }
+                            argument.Exception = exception;
+                            throw exception;
+                        }));
+
+                        arg.With(x => x.Result.Do(track =>
+                        {
+                            _logger.Information("parse gpx file data successfully completed");
+
+                            using (var processor = new WayPointsProcessor(_logger))
+                            {
+                                 _logger.Information("begin create visited points report");
+                                processor.Processed += (s, a) =>
+                                {
+                                    if (a.Exception != null)
+                                    {
+                                        throw a.Exception;
+                                    }
+                                    if (a.Result != null)
+                                    {
+                                        throw new NotImplementedException();
+                                    }
+                                    else
+                                    {
+                                        throw new InvalidOperationException("результат обработки посещенных точек не существует");
+                                    }
+                                };
+                                processor.Process();
+                            }
+                        }));
                     };
-                    throw new NotImplementedException();
+                    parser.Parse(body);
                 }
             }
             catch (Exception exception)
             {
-                if (exception.GetType() == typeof(InvalidOperationException)){
+                if (exception.GetType() == typeof(InvalidOperationException))
+                {
                     _logger.Warning(exception, exception.Message);
                     argument.Exception = exception;
                 }
-                else 
+                else
                 {
                     argument.Exception = exception;
                     _logger.Fatal(exception, exception.Message);

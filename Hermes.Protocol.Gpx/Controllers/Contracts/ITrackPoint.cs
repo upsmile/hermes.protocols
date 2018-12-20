@@ -2,6 +2,7 @@ using System;
 
 namespace Hermes.Protocol.Gpx.Controllers.Contracts
 {
+
     /// <summary>
     /// Определяет точку трека
     /// </summary>

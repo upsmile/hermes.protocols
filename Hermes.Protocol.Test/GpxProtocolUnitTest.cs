@@ -60,7 +60,35 @@ namespace Hermes.Protocol.Test
             protocol.Post(data);
         }
 
-        [Fact(DisplayName = "test mssql connection to database")]
+        [Theory]
+        [InlineData("./Data/131890700909312893_1723776026.gpx", "131890700909312893","1723776026")]
+        [InlineData("./Data/131544183883686029_201950020.gpx", "131544183883686029", "201950020")]
+        public void GpxParserTest(string xmlFile, string time, string id){
+
+            var context = A.Fake<HttpContext>();  
+            var request = context.Request;
+
+            request.Body = File.OpenRead(xmlFile);           
+            var protocol = new HermesGpxProtocol(_logger);
+            protocol.ShouldNotBeNull();
+
+            var data = new GpxData
+            {
+                FileByteStream = request.Body,
+                Context = $"{time}_{id}.gpx&{1}"
+            };
+            
+            using(var parser = new GpxParser(_logger)){
+                parser.Parsed += (sender, arg) =>{
+                    arg.Exception.ShouldBeNull();
+                    arg.Result.ShouldNotBeNull();
+                    arg.Result.Routes.Count().ShouldBeGreaterThan(1);
+                };                  
+                parser.Parse(data);
+            }
+        }
+
+        [Fact]
         public void DataContextTest()
         {
             using (var context = new HermesDataContext())
@@ -68,7 +96,7 @@ namespace Hermes.Protocol.Test
                 context.ShouldNotBeNull();
                 var list = context.TransportTypes.Select(x => x.TypeName).ToList();
                 list.ShouldNotBeNull();
-                list.Count.ShouldBeEqualTo(2);
+                list.Count.ShouldBeEqualTo(2);                
             }            
         }
     }
