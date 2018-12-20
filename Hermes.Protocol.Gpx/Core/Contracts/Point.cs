@@ -14,7 +14,7 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
 
         #region IRoutePoint implementation
 
-        public IGeoPoint Position { get; set; }
+        public IPosition Position { get; set; }
 
         public DateTime Time { get; set; }
 

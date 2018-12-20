@@ -5,14 +5,14 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
 {
     public interface IHermesGpxResult
      {
-         IEnumerable<TrackRouteStorage> Routes { get; set; }
+         IEnumerable<Track> Routes { get; set; }
          Dictionary<DateTime,double> Dates { get; set; } 
          IUploadDataParams Params { get; set; }
      }
 
     internal sealed class HermesGpxResult : IHermesGpxResult
     {
-        public IEnumerable<TrackRouteStorage> Routes { get;set; }
+        public IEnumerable<Track> Routes { get;set; }
         public Dictionary<DateTime, double> Dates { get;set; }
         public IUploadDataParams Params { get;set; }
     }

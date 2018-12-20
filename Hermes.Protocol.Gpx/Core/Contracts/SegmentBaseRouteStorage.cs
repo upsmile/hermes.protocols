@@ -4,7 +4,7 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
     /// <summary>
     /// Сегмент трека
     /// </summary>
-    public class SegmentRouteStorage : SegmentRouteStorageBase
+    public class SegmentBaseRouteStorage : SegmentBase
     {
     }
 

@@ -20,7 +20,7 @@ namespace Hermes.Protocol.Gpx.Core.Services
         {
             Parsed?.Invoke(this, arg);
         }
-        public void Parse(IUploadData data)
+        public void Parse(IProtocolContext data)
         {
             _logger.Information("begin parse gpx data");
             var track = data ?? throw new ArgumentNullException(nameof(data));
@@ -40,7 +40,7 @@ namespace Hermes.Protocol.Gpx.Core.Services
                     }                    
                     var routesByDays = segments.ToSegmentsDictionary().ToFilteredRoutes();
 
-                    var routes = routesByDays as TrackRouteStorage[] ?? routesByDays.ToArray();
+                    var routes = routesByDays as Track[] ?? routesByDays.ToArray();
                     var distancesByDate = routes
                         .SelectMany(d => d.Keys).ToDictionary(key => key.TrackDate
                         , key => key.Distance);

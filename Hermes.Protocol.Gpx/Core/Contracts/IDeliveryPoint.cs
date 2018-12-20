@@ -26,7 +26,7 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
         /// Координаты точки на карте
         /// </summary>
         /// <value>The position.</value>
-        IGeoPoint Position { get; set; }
+        IPosition Position { get; set; }
         /// <summary>
         /// Время входа
         /// </summary>

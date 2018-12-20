@@ -6,7 +6,7 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
     /// <summary>
     /// Базовый авбстрактный класс работы с хранилищем сегментов треков 
     /// </summary>
-    public abstract class SegmentRouteStorageBase : Dictionary<RouteHeader, IEnumerable<ITrackPoint>>
+    public abstract class SegmentBase : Dictionary<RouteHeader, IEnumerable<ITrackPoint>>
     {
 
     }

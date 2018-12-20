@@ -7,7 +7,7 @@ using System.Xml.Linq;
 namespace Hermes.Protocol.Gpx.Core.Contracts
 {
 
-    public static class GpxProtocolExtentions
+    public static class GpxExtMethods
     {
 
         /// <summary>
@@ -82,18 +82,12 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
                 break;
             }
             if (fixedpoint == null) return;
+            
+            // todo: remove recurcive call
             DoSmoothTrack(pointslist);
         }
 
 
-        /// <summary>
-        /// Сегмент трека
-        /// </summary>
-        private const string Trkseg = "trkseg";
-        /// <summary>
-        /// Трек
-        /// </summary>
-        private const string Trk = "trk";
         /// <summary>
         /// Радиус Земли
         /// </summary>
@@ -268,7 +262,7 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
         /// </summary>
         /// <param name="segmentstorage"></param>
         /// <returns></returns>
-        private static RouteHeader ToTrackRouteDefinision(this SegmentRouteStorageBase segmentstorage)
+        private static RouteHeader ToTrackRouteDefinision(this SegmentBase segmentstorage)
         {
             if (segmentstorage is null)
                 throw new ArgumentNullException(nameof(segmentstorage));
@@ -313,7 +307,7 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
         /// </summary>
         /// <param name="segmentstorage"></param>
         /// <returns></returns>
-        private static TimeSpan ToRouteDuration(this SegmentRouteStorageBase segmentstorage)
+        private static TimeSpan ToRouteDuration(this SegmentBase segmentstorage)
         {
             if (segmentstorage is null)
                 throw new ArgumentNullException(nameof(segmentstorage));
@@ -344,18 +338,18 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
         /// </summary>
         /// <param name="sd"></param>
         /// <returns></returns>
-        public static IEnumerable<TrackRouteStorage> ToFilteredRoutes(this Dictionary<DateTime, List<List<ITrackPoint>>> sd)
+        public static IEnumerable<Track> ToFilteredRoutes(this Dictionary<DateTime, List<List<ITrackPoint>>> sd)
         {
             #region
-            var routeStorage = new List<TrackRouteStorage>();
+            var routeStorage = new List<Track>();
             var dateList = sd.Keys;
             foreach (var dateRoute in dateList)
             {
                 var t = sd.FirstOrDefault(x => x.Key.ToShortDateString().Equals(dateRoute.ToShortDateString()));
-                var trackstorage = new TrackRouteStorage();
+                var trackstorage = new Track();
                 if (t.Value != null)
                 {
-                    var segmentStorage = new SegmentRouteStorage();
+                    var segmentStorage = new SegmentBaseRouteStorage();
                     foreach (var segment in t.Value)
                     {
                         var dates = segment.ToStartStopSegment();
@@ -374,11 +368,11 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
                     trackstorage.Add(trackHeader, segmentStorage);
                 }
 
-                var filterStorage = new TrackRouteStorage();
+                var filterStorage = new Track();
                 foreach (var item in trackstorage)
                 {
                     var value = item.Value;
-                    var filteredSegments = new SegmentRouteStorage();
+                    var filteredSegments = new SegmentBaseRouteStorage();
                     foreach (var segment in value)
                     {
                         segment.WithValue(x => x.Value.Do(val =>

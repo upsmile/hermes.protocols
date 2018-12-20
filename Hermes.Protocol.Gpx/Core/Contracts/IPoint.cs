@@ -5,7 +5,7 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
     public interface IPoint
     {
 
-        IGeoPoint Position { get; set; }
+        IPosition Position { get; set; }
         /// <summary>
         /// Время фиксации измерений
         /// </summary>

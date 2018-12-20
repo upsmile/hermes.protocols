@@ -3,7 +3,7 @@ using Hermes.Protocol.Gpx.Core.Contracts;
 using Hermes.Protocol.Gpx.Core.Services;
 using Serilog;
 
-namespace Hermes.Protocol.Gpx.Controllers.Protocol
+namespace Hermes.Protocol.Gpx.Protocols
 {
 
     public sealed class HermesGpxProtocol : IHermesProtocol, IDisposable
@@ -23,11 +23,11 @@ namespace Hermes.Protocol.Gpx.Controllers.Protocol
         public void GetMessage(object data)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
-            if (data.GetType() != typeof(GpxData)) throw new InvalidCastException();
+            if (data.GetType() != typeof(Core.Contracts.ProtocolContext)) throw new InvalidCastException();
             var argument = new HermesProtocolEventArg();
             try
             {
-                var body = (IUploadData)data;
+                var body = (IProtocolContext)data;
 
                 using (var parser = new GpxParser(_logger))
                 {

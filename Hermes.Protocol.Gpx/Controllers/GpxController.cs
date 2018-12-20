@@ -3,8 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Hermes.Protocol.Gpx.Controllers.Protocol;
-using Hermes.Protocol.Gpx.Core.Contracts;
+using Hermes.Protocol.Gpx.Protocols;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
@@ -34,7 +33,7 @@ namespace Hermes.Protocol.Gpx.Controllers
                                                               {
                                                                   var body = Request.Body;
                                                                   body.Flush();
-                                                                  var data = new GpxData()
+                                                                  var data = new Core.Contracts.ProtocolContext()
                                                                   {
                                                                       FileByteStream = body,
                                                                       Context = $"{id}#{tt}#{de.ToFileTime()}"

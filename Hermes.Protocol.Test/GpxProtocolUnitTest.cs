@@ -5,9 +5,8 @@ using FakeItEasy;
 using FluentAssert;
 using Hermes.EntityFrameworkCore.Data.Model;
 using Hermes.Protocol.Gpx;
-using Hermes.Protocol.Gpx.Controllers.Protocol;
-using Hermes.Protocol.Gpx.Core.Contracts;
 using Hermes.Protocol.Gpx.Core.Services;
+using Hermes.Protocol.Gpx.Protocols;
 using Microsoft.AspNetCore.Http;
 using Serilog;
 using Xunit;
@@ -46,7 +45,7 @@ namespace Hermes.Protocol.Test
             var protocol = new HermesGpxProtocol(_logger);
             protocol.ShouldNotBeNull();
 
-            var data = new GpxData
+            var data = new Gpx.Core.Contracts.ProtocolContext
             {
                 FileByteStream = request.Body,
                 Context = $"{131890700909312893}_{1723776026}.gpx&{1}"
@@ -72,7 +71,7 @@ namespace Hermes.Protocol.Test
             var protocol = new HermesGpxProtocol(_logger);
             protocol.ShouldNotBeNull();
 
-            var data = new GpxData
+            var data = new Gpx.Core.Contracts.ProtocolContext
             {
                 FileByteStream = request.Body,
                 Context = $"{time}_{id}.gpx&{1}"
@@ -94,7 +93,8 @@ namespace Hermes.Protocol.Test
             using (var context = new HermesDataContext())
             {
                 context.ShouldNotBeNull();
-                var list = context.TransportTypes.Select(x => x.TypeName).ToList();
+                var list = context.TransportTypes.
+                    Select(x => x.TypeName).ToList();
                 list.ShouldNotBeNull();
                 list.Count.ShouldBeEqualTo(2);                
             }            
