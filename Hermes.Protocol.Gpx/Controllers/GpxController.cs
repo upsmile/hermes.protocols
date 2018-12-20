@@ -3,8 +3,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Hermes.Protocol.Gpx.Controllers.Contracts;
-using Hermes.Protocol.Gpx.Controllers.Services;
+using Hermes.Protocol.Gpx.Controllers.Protocol;
+using Hermes.Protocol.Gpx.Core.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
@@ -48,7 +48,7 @@ namespace Hermes.Protocol.Gpx.Controllers
                                                                           throw arg.Exception;
                                                                       }
                                                                       if (arg.Result != null)
-                                                                      {                                                                          
+                                                                      {
                                                                           result = new JsonResult(arg.Result);
                                                                       }
                                                                       else
@@ -57,7 +57,7 @@ namespace Hermes.Protocol.Gpx.Controllers
                                                                           throw new InvalidOperationException("protocol result is empty");
                                                                       }
                                                                   };
-                                                                  protocol.Post(data);                                                                  
+                                                                  protocol.GetMessage(data);
                                                                   return result;
                                                               }
                                                               catch (Exception e)

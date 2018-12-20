@@ -5,10 +5,10 @@ using FakeItEasy;
 using FluentAssert;
 using Hermes.EntityFrameworkCore.Data.Model;
 using Hermes.Protocol.Gpx;
-using Hermes.Protocol.Gpx.Controllers.Contracts;
 using Hermes.Protocol.Gpx.Controllers.Services;
+using Hermes.Protocol.Gpx.Core.Contracts;
+using Hermes.Protocol.Gpx.Core.Services;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Primitives;
 using Serilog;
 using Xunit;
 

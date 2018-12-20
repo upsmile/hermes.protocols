@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Hermes.EntityFrameworkCore.Data.Model
+﻿namespace Hermes.EntityFrameworkCore.Data.Model
 {
     public class Sysdiagrams
     {
