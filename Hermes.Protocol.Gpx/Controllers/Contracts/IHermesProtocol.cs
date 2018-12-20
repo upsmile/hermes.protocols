@@ -1,19 +1,12 @@
-using System.IO;
-using Serilog;
-
-namespace Hermes.Protocol.Gpx.Controllers.Services
+namespace Hermes.Protocol.Gpx.Controllers.Contracts
 {
-    public interface IUploadData
-    {
-        string Context { get; set; }
-        Stream FileByteStream { get; set; }
-    }
 
-    public delegate void HermesProtocolEvent(object snder, HermesProtocolEventArg arg);
+    public delegate void HermesProtocolEvent(object sender, HermesProtocolEventArg arg);
 
     public interface IHermesProtocol
     {
-        void Post(object data, ILogger logger);
+        void Post(object data);
+        
         event HermesProtocolEvent Posted;
     }
 }

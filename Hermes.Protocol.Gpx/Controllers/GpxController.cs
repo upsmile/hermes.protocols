@@ -1,12 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
+using Hermes.Protocol.Gpx.Controllers.Contracts;
 using Hermes.Protocol.Gpx.Controllers.Services;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
@@ -17,7 +14,7 @@ namespace Hermes.Protocol.Gpx.Controllers
     [ApiController]
     public class GpxController : ControllerBase
     {
-        // Post api/values
+
         [HttpPost]
         public async Task<JsonResult> Post() => await Task.Run(() =>
                                                           {
@@ -42,7 +39,7 @@ namespace Hermes.Protocol.Gpx.Controllers
                                                                       FileByteStream = body,
                                                                       Context = $"{id}#{tt}#{de.ToFileTime()}"
                                                                   };
-                                                                  var protocol = new HermesGpxProtocol();
+                                                                  var protocol = new HermesGpxProtocol(logger);
                                                                   JsonResult result = null;
                                                                   protocol.Posted += (sender, arg) =>
                                                                   {
@@ -50,9 +47,8 @@ namespace Hermes.Protocol.Gpx.Controllers
                                                                       {
                                                                           throw arg.Exception;
                                                                       }
-
                                                                       if (arg.Result != null)
-                                                                      {
+                                                                      {                                                                          
                                                                           result = new JsonResult(arg.Result);
                                                                       }
                                                                       else
@@ -61,7 +57,7 @@ namespace Hermes.Protocol.Gpx.Controllers
                                                                           throw new InvalidOperationException("protocol result is empty");
                                                                       }
                                                                   };
-                                                                  protocol.Post(data, logger);
+                                                                  protocol.Post(data);                                                                  
                                                                   return result;
                                                               }
                                                               catch (Exception e)
@@ -76,15 +72,16 @@ namespace Hermes.Protocol.Gpx.Controllers
                                                           });
 
         [HttpGet]
-        public async Task<HttpResponseMessage> Get() => await Task.Run(() =>
+        public async Task<JsonResult> Get() => await Task.Run(() =>
                                                                   {
                                                                       var logger = LoggerBootstrap.CreateLogger(Guid.NewGuid().ToString());
                                                                       logger.Information("create response => request {method}", Request.Method);
-                                                                      var message = new HttpResponseMessage(HttpStatusCode.OK);
-                                                                      // todo: implement apllication version in response
-                                                                      var content = new StringContent("hermes.api.protocol", Encoding.UTF8);
-                                                                      message.Content = content;
-                                                                      return message;
+                                                                      var result = new
+                                                                      {
+                                                                          code = HttpStatusCode.OK,
+                                                                          message = "hermes.api.protocol"
+                                                                      };
+                                                                      return new JsonResult(result);
                                                                   });
     }
 }
