@@ -5,7 +5,7 @@ using FakeItEasy;
 using FluentAssert;
 using Hermes.EntityFrameworkCore.Data.Model;
 using Hermes.Protocol.Gpx;
-using Hermes.Protocol.Gpx.Controllers.Services;
+using Hermes.Protocol.Gpx.Controllers.Protocol;
 using Hermes.Protocol.Gpx.Core.Contracts;
 using Hermes.Protocol.Gpx.Core.Services;
 using Microsoft.AspNetCore.Http;
@@ -57,7 +57,7 @@ namespace Hermes.Protocol.Test
                 arg.Exception.ShouldBeNull();
                 arg.Result.ShouldNotBeNull();
             };
-            protocol.Post(data);
+            protocol.GetMessage(data);
         }
 
         [Theory]
