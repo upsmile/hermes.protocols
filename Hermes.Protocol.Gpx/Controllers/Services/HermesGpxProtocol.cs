@@ -61,7 +61,7 @@ namespace Hermes.Protocol.Gpx.Controllers.Services
                                         throw new InvalidOperationException("результат обработки посещенных точек не существует");
                                     }
                                 };
-                                processor.Process();
+                                processor.Process(body);
                             }
                         }));
                     };
