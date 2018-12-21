@@ -30,8 +30,7 @@ namespace Hermes.Protocol.Gpx
             {
                 app.UseHsts();
             }
-
-            app.UseHttpsRedirection();
+            app.UseDirectoryBrowser();
             app.UseMvc();
         }
     }

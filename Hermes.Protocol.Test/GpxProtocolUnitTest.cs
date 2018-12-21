@@ -8,6 +8,7 @@ using Hermes.Protocol.Gpx;
 using Hermes.Protocol.Gpx.Core.Services;
 using Hermes.Protocol.Gpx.Protocols;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using Xunit;
 
@@ -39,10 +40,11 @@ namespace Hermes.Protocol.Test
             
             */          
             var context = A.Fake<HttpContext>();  
+            var config = A.Fake<IConfiguration>();
             var request = context.Request;
 
             request.Body = File.OpenRead(xmlFile);           
-            var protocol = new HermesGpxProtocol(_logger);
+            var protocol = new HermesGpxProtocol(_logger, config);
             protocol.ShouldNotBeNull();
 
             var data = new Gpx.Core.Contracts.ProtocolContext
@@ -65,10 +67,12 @@ namespace Hermes.Protocol.Test
         public void GpxParserTest(string xmlFile, string time, string id){
 
             var context = A.Fake<HttpContext>();  
+            var config = A.Fake<IConfiguration>();
+            
             var request = context.Request;
 
             request.Body = File.OpenRead(xmlFile);           
-            var protocol = new HermesGpxProtocol(_logger);
+            var protocol = new HermesGpxProtocol(_logger,config);
             protocol.ShouldNotBeNull();
 
             var data = new Gpx.Core.Contracts.ProtocolContext
@@ -80,13 +84,13 @@ namespace Hermes.Protocol.Test
             using(var parser = new GpxParser(_logger)){
                 parser.Parsed += (sender, arg) =>{
                     arg.Exception.ShouldBeNull();
-                    arg.Result.ShouldNotBeNull();
-                    arg.Result.Routes.Count().ShouldBeGreaterThan(1);
+                    arg.ParserResult.ShouldNotBeNull();
+                    arg.ParserResult.Routes.Count().ShouldBeGreaterThan(0);
                 };                  
                 parser.Parse(data);
             }
         }
-
+        
         [Fact]
         public void DataContextTest()
         {

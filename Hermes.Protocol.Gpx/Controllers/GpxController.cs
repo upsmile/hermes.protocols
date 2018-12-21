@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Hermes.Protocol.Gpx.Protocols;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 
 namespace Hermes.Protocol.Gpx.Controllers
@@ -13,22 +14,39 @@ namespace Hermes.Protocol.Gpx.Controllers
     [ApiController]
     public class GpxController : ControllerBase
     {
+        
+        private IConfiguration _configuration { get; set; }
 
+        public GpxController(IConfiguration configuration)
+        {
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));            
+        }
+        
+        
         [HttpPost]
         public async Task<JsonResult> Post() => await Task.Run(() =>
                                                           {
-                                                              Request.Headers.TryGetValue("transport_id", out var transportId);
-                                                              Request.Headers.TryGetValue("transport_type", out var transportType);
-                                                              Request.Headers.TryGetValue("event_date", out var eventDate);
-                                                              Request.Headers.TryGetValue("x-correlation-id", out var correlationid);
+                                                              Request.Headers.TryGetValue("transport_id", 
+                                                                  out var transportId);
+                                                              Request.Headers.TryGetValue("transport_type",
+                                                                  out var transportType);
+                                                              Request.Headers.TryGetValue("event_date", 
+                                                                  out var eventDate);
+                                                              Request.Headers.TryGetValue("x-correlation-id", 
+                                                                  out var correlation);
 
-                                                              var de = DateTime.FromFileTime(long.Parse(eventDate.ToList()[0]));
-                                                              var cid = correlationid.ToList()[0];
+                                                              var de = DateTime.FromFileTime(long.Parse(eventDate.
+                                                                  ToList()[0]));
+                                                              var cid = correlation.ToList()[0];
                                                               var id = transportId.ToList()[0];
                                                               var tt = transportType.ToList()[0];
+                                                              
                                                               var type = tt == "1" ? "Грузовой и прочий" : "TA";
-                                                              var logger = LoggerBootstrap.CreateLogger(id, tt, de, cid);
-                                                              logger.Information("begin create request {method}", Request.Method);
+                                                              
+                                                              var logger = LoggerBootstrap
+                                                                            .CreateLogger(id, tt, de, cid);
+                                                              logger.Information("begin create request {method}",
+                                                                  Request.Method);
                                                               try
                                                               {
                                                                   var body = Request.Body;
@@ -38,7 +56,7 @@ namespace Hermes.Protocol.Gpx.Controllers
                                                                       FileByteStream = body,
                                                                       Context = $"{id}#{tt}#{de.ToFileTime()}"
                                                                   };
-                                                                  var protocol = new HermesGpxProtocol(logger);
+                                                                  var protocol = new HermesGpxProtocol(logger,_configuration);
                                                                   JsonResult result = null;
                                                                   protocol.Posted += (sender, arg) =>
                                                                   {
@@ -53,7 +71,8 @@ namespace Hermes.Protocol.Gpx.Controllers
                                                                       else
                                                                       {
                                                                           logger.Warning("protocol result is empty");
-                                                                          throw new InvalidOperationException("protocol result is empty");
+                                                                          throw new InvalidOperationException
+                                                                              ("protocol result is empty");
                                                                       }
                                                                   };
                                                                   protocol.GetMessage(data);
@@ -71,10 +90,9 @@ namespace Hermes.Protocol.Gpx.Controllers
                                                           });
 
         [HttpGet]
-        public async Task<JsonResult> Get() => await Task.Run(() =>
-                                                                  {
+        public async Task<JsonResult> Get() => await Task.Run(() =>{
                                                                       var logger = LoggerBootstrap.CreateLogger(Guid.NewGuid().ToString());
-                                                                      logger.Information("create response => request {method}", Request.Method);
+                                                                      logger.Information("create response =>request {method}",Request.Method);
                                                                       var result = new
                                                                       {
                                                                           code = HttpStatusCode.OK,

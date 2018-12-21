@@ -1,17 +1,24 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Hermes.Protocol.Gpx.Core.Contracts;
 using Hermes.Protocol.Gpx.Core.Services;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 
 namespace Hermes.Protocol.Gpx.Protocols
 {
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     public sealed class HermesGpxProtocol : IHermesProtocol, IDisposable
     {
+        
         private readonly ILogger _logger;
-        public HermesGpxProtocol(ILogger logger)
+        private readonly IConfiguration _configuration;
+        
+        public HermesGpxProtocol(ILogger logger, IConfiguration configuration)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
         public event HermesProtocolEvent Posted;
 
@@ -23,7 +30,7 @@ namespace Hermes.Protocol.Gpx.Protocols
         public void GetMessage(object data)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
-            if (data.GetType() != typeof(Core.Contracts.ProtocolContext)) throw new InvalidCastException();
+            if (data.GetType() != typeof(ProtocolContext)) throw new InvalidCastException();
             var argument = new HermesProtocolEventArg();
             try
             {
@@ -39,7 +46,7 @@ namespace Hermes.Protocol.Gpx.Protocols
                             throw exception;
                         }));
 
-                        arg.With(x => x.Result.Do(track =>
+                        arg.With(x => x.ParserResult.Do(track =>
                         {
                             _logger.Information("parse gpx file data successfully completed");
 
@@ -58,14 +65,17 @@ namespace Hermes.Protocol.Gpx.Protocols
                                     }
                                     else
                                     {
-                                        throw new InvalidOperationException("результат обработки посещенных точек не существует");
+                                        throw new InvalidOperationException
+                                            ("результат обработки посещенных точек не существует");
                                     }
                                 };
                                 //Dictionary<DateTime, IEnumerable<IEnumerable<IPoint>>> Routes { get; set; }
                                 var config = new WayReportConfig()
                                 {
-                                    Context = body.Context
+                                    Context = body.Context,
+                                    Track = track
                                 };
+                                
                                 processor.GetReport(config);
                             }
                         }));
@@ -75,18 +85,9 @@ namespace Hermes.Protocol.Gpx.Protocols
             }
             catch (Exception exception)
             {
-                if (exception.GetType() == typeof(InvalidOperationException))
-                {
-                    argument.Exception = exception;
-                    _logger.Warning(exception, exception.Message);
-                    throw;
-                }
-                else
-                {
-                    argument.Exception = exception;
-                    _logger.Fatal(exception, exception.Message);
-                    throw;
-                }
+                argument.Exception = exception;
+                _logger.Error(exception, exception.Message);
+                throw;
             }
             finally
             {

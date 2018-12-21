@@ -41,16 +41,15 @@ namespace Hermes.Protocol.Gpx.Core.Services
                     var routesByDays = segments.ToSegmentsDictionary().ToFilteredRoutes();
 
                     var routes = routesByDays as Track[] ?? routesByDays.ToArray();
-                    var distancesByDate = routes
-                        .SelectMany(d => d.Keys).ToDictionary(key => key.TrackDate
-                        , key => key.Distance);
-                    var result = new HermesGpxResult
+                    var distancesByDate = routes.SelectMany(d => d.Keys)
+                        .ToDictionary(key => key.TrackDate, key => key.Distance);
+                    var result = new ParserResult
                     {
                         Dates = distancesByDate,
                         Routes = routes,
                         Params = param
                     };
-                    argument.Result = result;
+                    argument.ParserResult = result;
                 }));                
             }
             catch (Exception exception)

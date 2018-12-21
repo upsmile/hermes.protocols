@@ -4,7 +4,7 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
 {
     public sealed class HermesDataProcessorEventArg : EventArgs
     {
-        public IHermesGpxResult Result { get; set; }
+        public IParserResult ParserResult { get; set; }
         public Exception Exception { get; set; }
     }
 
