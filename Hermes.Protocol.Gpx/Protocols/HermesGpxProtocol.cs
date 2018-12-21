@@ -50,7 +50,7 @@ namespace Hermes.Protocol.Gpx.Protocols
                         {
                             _logger.Information("parse gpx file data successfully completed");
 
-                            using (var processor = new WayPointsProcessor(_logger))
+                            using (var processor = new WayPointsProcessor(_logger, _configuration))
                             {
                                 _logger.Information("begin create visited points report");
                                 processor.Processed += (s, a) =>

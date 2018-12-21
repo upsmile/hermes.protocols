@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FakeItEasy;
@@ -41,6 +42,15 @@ namespace Hermes.Protocol.Test
             */          
             var context = A.Fake<HttpContext>();  
             var config = A.Fake<IConfiguration>();
+            
+            
+            var configurationBuilder = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string>
+                {
+                    {"api", "" },
+                    {"api", "" }
+                }); 
+            
             var request = context.Request;
 
             request.Body = File.OpenRead(xmlFile);           

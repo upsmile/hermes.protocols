@@ -47,10 +47,9 @@ namespace Hermes.Protocol.Gpx.Core.Services
                 switch (fleetType)
                 {
                     case 1:
-                        api = "";
+                        var apiConfig = _configuration.GetSection("api");
                         throw new NotImplementedException("точки посещения грузового автотраспорта пока не реализованы");
                     case 2:
-                        api = "";
                         throw new NotImplementedException("точки посещения  автотраспорта  ТА пока не реализованы");
                     default:
                         throw new NotImplementedException(nameof(fleetType));
