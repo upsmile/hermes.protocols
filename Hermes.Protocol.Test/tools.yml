@@ -1,0 +1,3 @@
+hermes_db_model : 
+  mssql: "dotnet ef dbcontext scaffold ${HERMES_CONNECTION_STRING} Microsoft.EntityFrameworkCore.SqlServer -o Model"
+  oracle: ""

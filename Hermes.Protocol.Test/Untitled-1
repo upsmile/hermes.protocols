@@ -1,5 +1,0 @@
-
-
-dotnet ef dbcontext scaffold Microsoft.EntityFrameworkCore.SqlServer -force
-
- dotnet ef dbcontext scaffold "Data Source= 93.157.14.7\SQLEXPRESS;Initial Catalog=hermes;Persist Security Info=True;User ID=sa;Password=Asdewq12#z" Microsoft.EntityFrameworkCore.SqlServer -o Model
