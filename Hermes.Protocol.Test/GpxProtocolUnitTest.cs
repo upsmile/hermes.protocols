@@ -41,15 +41,16 @@ namespace Hermes.Protocol.Test
             
             */          
             var context = A.Fake<HttpContext>();  
-            var config = A.Fake<IConfiguration>();
+            //var config = A.Fake<IConfiguration>();
             
             
             var configurationBuilder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string>
                 {
-                    {"api", "" },
-                    {"api", "" }
-                }); 
+                    {"api", "http://193.23.58.37:8086/api/" }                   
+                });
+
+            var config =  configurationBuilder.Build();
             
             var request = context.Request;
 

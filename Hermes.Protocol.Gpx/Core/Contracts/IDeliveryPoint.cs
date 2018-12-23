@@ -1,8 +1,8 @@
 using System;
+using Hermes.Protocol.Gpx.Core.Contracts;
 
 namespace Hermes.Protocol.Gpx.Core.Contracts
 {
-
     /// <summary>
     /// Точка доставки на карте
     /// </summary>

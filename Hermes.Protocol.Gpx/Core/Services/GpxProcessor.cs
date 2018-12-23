@@ -9,10 +9,11 @@ namespace Hermes.Protocol.Gpx.Core.Services
 {
     public sealed class GpxParser : IHermesDataProcessor, IDisposable
     {
-        private  readonly ILogger _logger;
+        private readonly ILogger _logger;
 
-        public GpxParser(ILogger logger){
-            _logger= logger ?? throw new ArgumentNullException(nameof(logger)) ;
+        public GpxParser(ILogger logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public event HermesDataProcessorEvent Parsed;
@@ -27,7 +28,8 @@ namespace Hermes.Protocol.Gpx.Core.Services
             var argument = new HermesDataProcessorEventArg();
             try
             {
-                track.With(x=>x.FileByteStream.Do(stream =>{
+                track.With(x => x.FileByteStream.Do(stream =>
+                {
                     var document = XDocument.Load(stream);
                     var cfs = data.Context.Split('\\')[data.Context.Split('\\').Length - 1];
                     var param = cfs.ToUploadParameters();
@@ -37,7 +39,7 @@ namespace Hermes.Protocol.Gpx.Core.Services
                     foreach (var d in docList.Select(doc => doc.ToTrackSegments()))
                     {
                         segments.AddRange(d);
-                    }                    
+                    }
                     var routesByDays = segments.ToSegmentsDictionary().ToFilteredRoutes();
 
                     var routes = routesByDays as Track[] ?? routesByDays.ToArray();
@@ -50,7 +52,7 @@ namespace Hermes.Protocol.Gpx.Core.Services
                         Params = param
                     };
                     argument.ParserResult = result;
-                }));                
+                }));
             }
             catch (Exception exception)
             {
@@ -66,8 +68,7 @@ namespace Hermes.Protocol.Gpx.Core.Services
 
         public void Dispose()
         {
-           if(Parsed != null) Parsed += null;
+            if (Parsed != null) Parsed += null;
         }
     }
-
 }

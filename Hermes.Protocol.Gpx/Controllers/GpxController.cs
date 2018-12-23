@@ -20,7 +20,6 @@ namespace Hermes.Protocol.Gpx.Controllers
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-
         [HttpPost]
         public async Task<JsonResult> Post() => await Task.Run(() =>
                                                           {

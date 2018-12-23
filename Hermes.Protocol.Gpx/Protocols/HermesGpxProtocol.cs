@@ -7,11 +7,9 @@ using Serilog;
 
 namespace Hermes.Protocol.Gpx.Protocols
 {
-
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     public sealed class HermesGpxProtocol : IHermesProtocol, IDisposable
-    {
-        
+    {       
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
         
@@ -74,8 +72,7 @@ namespace Hermes.Protocol.Gpx.Protocols
                                 {
                                     Context = body.Context,
                                     Track = track
-                                };
-                                
+                                };                              
                                 processor.GetReport(config);
                             }
                         }));
@@ -97,23 +94,21 @@ namespace Hermes.Protocol.Gpx.Protocols
         }
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        private bool _disposedValue; // To detect redundant calls
 
-        void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (_disposedValue) return;
+            if (disposing)
             {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects).
-                    Posted += null;
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-
-                disposedValue = true;
+                // TODO: dispose managed state (managed objects).
+                Posted += null;
             }
+
+            // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+            // TODO: set large fields to null.
+
+            _disposedValue = true;
         }
 
         // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
