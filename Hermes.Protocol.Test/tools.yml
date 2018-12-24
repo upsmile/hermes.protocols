@@ -1,3 +1,6 @@
 hermes_db_model : 
   mssql: "dotnet ef dbcontext scaffold ${HERMES_CONNECTION_STRING} Microsoft.EntityFrameworkCore.SqlServer -o Model"
-  oracle: ""
+  oracle: "dotnet ef dbcontext scaffold ${ORACLE_CONNECTION_STRING} Microsoft.EntityFrameworkCore.SqlServer -o Model"
+docker:
+  build: "docker build -t gpxprotocol ."
+  run: "docker run -d -p 5010:5010 --name hermes.cache.api gpxprotocol:latest"

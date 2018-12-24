@@ -24,36 +24,19 @@ namespace Hermes.Protocol.Test
             _logger = LoggerBootstrap.CreateLogger(Guid.NewGuid().ToString());
         }
         [Theory]
-        [InlineData("./Data/131890700909312893_1723776026.gpx")]
+        [InlineData("./Data/131544183883686029_201950020.gpx")]
         public void PostControllerIntegrationTest(string xmlFile)
         {
-            
-/*          var transportId = new StringValues();
-            var transportType = new StringValues();
-            var eventDate = new StringValues();
-            var correlation = new StringValues();    
-            
-            request.Headers.Add("transport_id", transportId);
-            request.Headers.Add("transport_type", transportType);
-            request.Headers.Add("event_date",eventDate);
-            request.Headers.Add("x-correlation-id", correlation);
-                                             
-            
-            */          
-            var context = A.Fake<HttpContext>();  
-            //var config = A.Fake<IConfiguration>();
-            
-            
+            var context = A.Fake<HttpContext>();                          
             var configurationBuilder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string>
                 {
-                    {"api", "http://193.23.58.37:8086/api/" }                   
+                    {"cache", "http://93.157.14.7:8089/api/points/"},
+                    {"way", "http://93.157.14.7:8086/Hermes.Way.Api/api/"}               
                 });
 
-            var config =  configurationBuilder.Build();
-            
+            var config =  configurationBuilder.Build();            
             var request = context.Request;
-
             request.Body = File.OpenRead(xmlFile);           
             var protocol = new HermesGpxProtocol(_logger, config);
             protocol.ShouldNotBeNull();
@@ -61,7 +44,7 @@ namespace Hermes.Protocol.Test
             var data = new Gpx.Core.Contracts.ProtocolContext
             {
                 FileByteStream = request.Body,
-                Context = $"{131890700909312893}_{1723776026}.gpx&{1}"
+                Context = $"{131900760000000000}_{82131026}.gpx&{2}"
             };
             
             protocol.Posted += (sender, arg) =>
