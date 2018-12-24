@@ -17,6 +17,6 @@ FROM microsoft/dotnet:2.1-aspnetcore-runtime
 WORKDIR /app
 COPY --from=build-env /app/out .
 
-EXPOSE 5010/tcp
-ENV ASPNETCORE_URLS http://*:5010
+EXPOSE 5000/tcp
+ENV ASPNETCORE_URLS http://*:5000
 ENTRYPOINT ["dotnet", "Hermes.Protocol.Gpx.dll"]
