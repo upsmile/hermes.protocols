@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Hermes.Protocol.Gpx.Core.Contracts;
 using Microsoft.Extensions.Configuration;
 using Serilog;
@@ -31,6 +32,8 @@ namespace Hermes.Protocol.Gpx.Core.Services
             {
 
                 var result = new PointsProcessorResult();
+                var waydict = new PointsInstance();
+
                 var parameters = source.Context.Split('\\')[source.Context.Split('\\').Length - 1].ToUploadParameters();
                 var route = source.Track;
 
@@ -42,17 +45,18 @@ namespace Hermes.Protocol.Gpx.Core.Services
                     Track = route,
                     Context = config.Context
                 };
+                
+                var dates = config.Track.Dates;   
 
-                var dates = config.Track.Dates;
                 foreach (var date in dates)
                 {
                     // загрузка данных  о маршруте траспорта
-                    /*   object wayPoints = null;                       
                     using (var cache = new PointsCacheService(_configuration,_logger))
                     {
                         cache.Loaded += (s,o) =>{
                             o.With(c=> c.Result.Do(rslt => {
-                                wayPoints = rslt;  
+                                    var points = rslt as List<DeliveryPointCache>;  
+                                    waydict.Add(date.Key, points);
                             }));
 
                             o.With(ex => ex.Exception.Do(e => {
@@ -61,9 +65,19 @@ namespace Hermes.Protocol.Gpx.Core.Services
                                 throw e;
                             }));
                         };
+
                         cache.Get(fleetId,fleetType,parameters.Date);
-                    } */
+                    } 
                 }
+
+                            
+            config.With(x => x.Track.Do(routes =>
+            {
+                _logger.Information("Начинается определение посещенных точек для траспортного средства");                
+                result.Result = routes.GetPointsReport(waydict, _logger);
+                _logger.Information("определение посещенных точек для траспортного средства завершено");
+            }));  
+
                 // получение результата посещенных точек траспортных средств
             }
             catch (Exception exception)
