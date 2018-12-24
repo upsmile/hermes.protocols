@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Hermes.Protocol.Gpx.Core.Contracts;
 using Microsoft.Extensions.Configuration;
 using Serilog;
+// ReSharper disable All
 
 namespace Hermes.Protocol.Gpx.Core.Services
 {
@@ -31,8 +33,8 @@ namespace Hermes.Protocol.Gpx.Core.Services
             try
             {
 
-                var result = new PointsProcessorResult();
-                var waydict = new PointsInstance();
+                var result = new PointsProcessorResult();                
+                var way = new Dictionary<DateTime, IEnumerable<DeliveryPointCache>>();
 
                 var parameters = source.Context.Split('\\')[source.Context.Split('\\').Length - 1].ToUploadParameters();
                 var route = source.Track;
@@ -47,38 +49,50 @@ namespace Hermes.Protocol.Gpx.Core.Services
                 };
                 
                 var dates = config.Track.Dates;   
-
+                var mapping = config.Track.Routes.ToTrackMapping();
                 foreach (var date in dates)
                 {
-                    // загрузка данных  о маршруте траспорта
                     using (var cache = new PointsCacheService(_configuration,_logger))
                     {
-                        cache.Loaded += (s,o) =>{
-                            o.With(c=> c.Result.Do(rslt => {
-                                    var points = rslt as List<DeliveryPointCache>;  
-                                    waydict.Add(date.Key, points);
+                        cache.Loaded += (s, o) =>
+                        {
+                            o.With(c => c.Result.Do(res =>
+                            {
+                                var points = res.Cast<DeliveryPointCache>().ToList();
+                                way.Add(date.Key, points);
+                                _logger.Debug($"load points from cache successfully complete " +
+                                              $"{date.Key.ToShortDateString()}" +
+                                              $"id: {fleetId} type: {fleetType}");
                             }));
-
-                            o.With(ex => ex.Exception.Do(e => {
+                            o.With(ex => ex.Exception.Do(e =>
+                            {
                                 argument.Exception = e;
                                 _logger.Fatal(e, e.Message);
                                 throw e;
                             }));
                         };
-
-                        cache.Get(fleetId,fleetType,parameters.Date);
+                            
+                        _logger.Debug($"start load points from cache");
+                        cache.Get(fleetId,fleetType,date.Key);
                     } 
                 }
-
-                            
-            config.With(x => x.Track.Do(routes =>
-            {
-                _logger.Information("Начинается определение посещенных точек для траспортного средства");                
-                result.Result = routes.GetPointsReport(waydict, _logger);
-                _logger.Information("определение посещенных точек для траспортного средства завершено");
-            }));  
-
-                // получение результата посещенных точек траспортных средств
+                var path = new List<IPoint>();                                
+                result.Result = new Dictionary<DateTime,IEnumerable<IDeliveryPoint>>();               
+                foreach (var date in mapping.Keys)
+                {                    
+                    var points = way[date];
+                    var track = mapping[date];
+                    var nearest = track.NearestPoints(points, config.Radius/1000);                    
+                    foreach (var segment in track)
+                    {
+                        path.AddRange(segment);
+                    }                    
+                    var visited = nearest.ToVisitedPointsList(path, config.Radius/1000);                    
+                    result.Result.Add(date,visited);
+                    _logger.Debug($"{date.ToShortDateString()} id: {fleetId} type:{fleetType} report successfully complete");
+                }
+                argument.Result = result;  
+                _logger.Debug($"id: {fleetId} type:{fleetType} report successfully complete");
             }
             catch (Exception exception)
             {

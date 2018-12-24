@@ -8,6 +8,11 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
             Lng = lon;
         }
 
+        public Position()
+        {
+            IsEmpty = false;
+        }
+
         public double Lat { get; set; }
 
         public double Lng { get; set; }

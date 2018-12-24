@@ -260,21 +260,21 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
         /// <summary>
         /// Возвращает описание для  трека за текущий день
         /// </summary>
-        /// <param name="segmentstorage"></param>
+        /// <param name="segment"></param>
         /// <returns></returns>
-        private static RouteHeader ToTrackRouteDefinision(this SegmentBase segmentstorage)
+        private static RouteHeader ToTrackRouteDefinitions(this SegmentBase segment)
         {
-            if (segmentstorage is null)
-                throw new ArgumentNullException(nameof(segmentstorage));
-            var header = segmentstorage.Keys.ToList().FirstOrDefault();
+            if (segment is null)
+                throw new ArgumentNullException(nameof(segment));
+            var header = segment.Keys.ToList().FirstOrDefault();
             {
-                var lastOrDefault = segmentstorage.Keys.ToList().LastOrDefault();
+                var lastOrDefault = segment.Keys.ToList().LastOrDefault();
                 {
                     var result = new RouteHeader
                     {
-                        Distance = segmentstorage.ToRouteDistance(),
-                        Duration = segmentstorage.ToRouteDuration(),
-                        TrackDate = segmentstorage.Keys.ToTrackDateVales().Key,
+                        Distance = segment.ToRouteDistance(),
+                        Duration = segment.ToRouteDuration(),
+                        TrackDate = segment.Keys.ToTrackDateVales().Key,
                         Start = header.Start,
                         Stop = lastOrDefault.Stop,
                         Guid = Guid.NewGuid()
@@ -364,7 +364,7 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
                         };
                         segmentStorage.Add(header, segment);
                     }
-                    var trackHeader = segmentStorage.ToTrackRouteDefinision();
+                    var trackHeader = segmentStorage.ToTrackRouteDefinitions();
                     trackstorage.Add(trackHeader, segmentStorage);
                 }
 
@@ -390,7 +390,7 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
                               });
                           }));
                     }
-                    var def = filteredSegments.ToTrackRouteDefinision();
+                    var def = filteredSegments.ToTrackRouteDefinitions();
                     filterStorage.Add(def, filteredSegments);
                 }
                 routeStorage.Add(filterStorage);

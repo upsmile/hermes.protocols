@@ -7,7 +7,8 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
     {
                 
         public string Context { get; set; }
-        
+        public double Radius { get; set; }
+
         public IParserResult Track { get; set; }
         
     }

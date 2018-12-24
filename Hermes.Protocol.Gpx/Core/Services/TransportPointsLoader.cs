@@ -11,7 +11,8 @@ namespace Hermes.Protocol.Gpx.Core.Services
 {
     public sealed class PointsLoaderEvtArg : EventArgs
     {
-        public object Result { get; set; }
+        public List<object> Result { get; set; }
+        
         public Exception Exception { get; set; }
     }
 

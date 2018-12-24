@@ -13,4 +13,6 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
 
          public static DeliveryPointCache FromJson(string json) => JsonConvert.DeserializeObject<DeliveryPointCache>(json, Converter.Settings);
     }
+    
+    
 }

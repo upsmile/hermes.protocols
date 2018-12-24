@@ -8,6 +8,8 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
         IParserResult Track { get; set; }
         
         string Context { get; set; }
+        
+        double Radius { get; set; }
 
     }
 }

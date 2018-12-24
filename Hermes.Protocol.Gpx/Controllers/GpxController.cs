@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Hermes.Protocol.Gpx.Core.Contracts;
 using Hermes.Protocol.Gpx.Protocols;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -14,10 +16,11 @@ namespace Hermes.Protocol.Gpx.Controllers
     [ApiController]
     public class GpxController : ControllerBase
     {
-        private IConfiguration _configuration { get; set; }
+        private IConfiguration Configuration { get; set; }
+
         public GpxController(IConfiguration configuration)
         {
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         [HttpPost]
@@ -31,8 +34,10 @@ namespace Hermes.Protocol.Gpx.Controllers
                                                               var cid = correlation.ToList()[0];
                                                               var id = transportId.ToList()[0];
                                                               var tt = transportType.ToList()[0];
-                                                              var type = tt == "1" ? "Грузовой и прочий" : "TA";
-                                                              var logger = LoggerBootstrap.CreateLogger(id, tt, de, cid);
+
+                                                              var seq = Configuration["seq"];
+                                                              var sentry = Configuration["sentry"];                                                              
+                                                              var logger = LoggerBootstrap.CreateLogger(id, tt, de, cid,seq,sentry);
                                                               logger.Information("begin create request {method}", Request.Method);
                                                               try
                                                               {
@@ -43,26 +48,41 @@ namespace Hermes.Protocol.Gpx.Controllers
                                                                       FileByteStream = body,
                                                                       Context = $"{id}#{tt}#{de.ToFileTime()}"
                                                                   };
-                                                                  var protocol = new HermesGpxProtocol(logger, _configuration);
-                                                                  JsonResult result = null;
+                                                                  var protocol = new HermesGpxProtocol(logger, Configuration);
+                                                                  var result = new Dictionary<string, object>();
+                                                                  protocol.Report += (sender, arg) =>
+                                                                      {
+                                                                          logger.Debug("report successfully complete?");
+                                                                          arg.With(x => x.Exception.Do(e =>
+                                                                              {
+                                                                                  logger.Warning(e, e.Message);
+                                                                              }));
+                                                                          arg.With(x => x.Result.Do(res =>
+                                                                          {
+                                                                              result.Add("report",res);
+                                                                          }));
+                                                                      };
+                                                                  protocol.Parsed += (sender, arg) =>
+                                                                  {
+                                                                      logger.Debug("parser successfully complete?");
+                                                                      arg.With(x => x.Exception.Do(e => throw e));
+                                                                      arg.With(x => x.Result.Do(res =>
+                                                                      {
+                                                                          result.Add("report",res);
+                                                                      }));
+                                                                  };
+
                                                                   protocol.Posted += (sender, arg) =>
                                                                   {
-                                                                      if (arg.Exception != null)
+                                                                      logger.Debug("parser successfully complete?");
+                                                                      arg.With(x => x.Exception.Do(e => throw e));
+                                                                      arg.With(x => x.Result.Do(res =>
                                                                       {
-                                                                          throw arg.Exception;
-                                                                      }
-                                                                      if (arg.Result != null)
-                                                                      {
-                                                                          result = new JsonResult(arg.Result);
-                                                                      }
-                                                                      else
-                                                                      {
-                                                                          logger.Error("protocol result is empty");
-                                                                          throw new InvalidOperationException("protocol result is empty");
-                                                                      }
-                                                                  };
-                                                                  protocol.GetMessage(data);
-                                                                  return result;
+                                                                          result.Add("report",res);
+                                                                      }));
+                                                                  };                                                                  
+                                                                  protocol.GetMessage(data);                                                                  
+                                                                  return new JsonResult(cid);
                                                               }
                                                               catch (Exception e)
                                                               {
@@ -78,8 +98,13 @@ namespace Hermes.Protocol.Gpx.Controllers
         [HttpGet]
         public async Task<JsonResult> Get() => await Task.Run(() =>
         {
-            var logger = LoggerBootstrap.CreateLogger(Guid.NewGuid().ToString());
+            var cnf = Configuration["api"];
+            var seq = Configuration["seq"];
+            var sentry = Configuration["sentry"];                                                              
+            
+            var logger = LoggerBootstrap.CreateLogger("GET_TEST", "GET_TEST", DateTime.Now, Guid.NewGuid().ToString(), seq, sentry);
             logger.Information("create response =>request {method}", Request.Method);
+            
             var result = new
             {
                 code = HttpStatusCode.OK,

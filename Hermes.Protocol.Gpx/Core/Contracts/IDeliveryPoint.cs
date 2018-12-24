@@ -36,4 +36,14 @@ namespace Hermes.Protocol.Gpx.Core.Contracts
         /// </summary>
         DateTime TimeOut { get; set; }
     }
+    
+    
+    public sealed class DeliveryPoint:IDeliveryPoint{
+        public object ContractItem { get; set; }
+        public object DataItem { get; set; }
+        public double Code { get; set; }
+        public IPosition Position { get; set; }
+        public DateTime TimeIn { get; set; }
+        public DateTime TimeOut { get; set; }
+    }
 }

@@ -20,9 +20,23 @@ namespace Hermes.Protocol.Gpx.Protocols
         }
         public event HermesProtocolEvent Posted;
 
+        public event HermesProtocolEvent Report;
+        
+        public event HermesProtocolEvent Parsed;
+
+        private void OnParsed(HermesProtocolEventArg arg)
+        {
+            Parsed?.Invoke(this, arg);
+        }
+
         private void OnPosted(HermesProtocolEventArg arg)
         {
             Posted?.Invoke(this, arg);
+        }
+
+        private void OnReport(HermesProtocolEventArg arg)
+        {
+            Report?.Invoke(this, arg);
         }
 
         public void GetMessage(object data)
@@ -30,6 +44,8 @@ namespace Hermes.Protocol.Gpx.Protocols
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (data.GetType() != typeof(ProtocolContext)) throw new InvalidCastException();
             var argument = new HermesProtocolEventArg();
+            var result = new GpxProtocolResult();
+            
             try
             {
                 var body = (IProtocolContext)data;
@@ -44,6 +60,8 @@ namespace Hermes.Protocol.Gpx.Protocols
                             throw exception;
                         }));
 
+                        result.ParserResult = arg.ParserResult;
+                        
                         arg.With(x => x.ParserResult.Do(track =>
                         {
                             _logger.Information("parse gpx file data successfully completed");
@@ -52,27 +70,30 @@ namespace Hermes.Protocol.Gpx.Protocols
                             {
                                 _logger.Information("begin create visited points report");
                                 processor.Processed += (s, a) =>
-                                {
+                                {                                    
                                     if (a.Exception != null)
                                     {
                                         throw a.Exception;
                                     }
                                     if (a.Result != null)
                                     {
-                                        throw new NotImplementedException();
+                                        result.ReportResult = a.Result;
+                                        argument.Result = result;
                                     }
                                     else
                                     {
-                                        throw new InvalidOperationException
-                                            ("результат обработки посещенных точек не существует");
+                                        var warn =  new InvalidOperationException("результат обработки посещенных точек не существует");
+                                        _logger.Warning(warn,warn.Message);
                                     }
                                 };
-                                //Dictionary<DateTime, IEnumerable<IEnumerable<IPoint>>> Routes { get; set; }
+                                
                                 var config = new WayReportConfig()
                                 {
                                     Context = body.Context,
-                                    Track = track
-                                };                              
+                                    Track = track,
+                                    Radius = 150 // TODO: Config file!!
+                                };   
+                                
                                 processor.GetReport(config);
                             }
                         }));
@@ -87,7 +108,7 @@ namespace Hermes.Protocol.Gpx.Protocols
                 throw;
             }
             finally
-            {
+            {                
                 OnPosted(argument);
             }
 
@@ -101,8 +122,10 @@ namespace Hermes.Protocol.Gpx.Protocols
             if (_disposedValue) return;
             if (disposing)
             {
-                // TODO: dispose managed state (managed objects).
                 Posted += null;
+                Parsed += null;
+                Report += null;
+
             }
 
             // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

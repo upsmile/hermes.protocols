@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Text;
 using Hermes.Protocol.Gpx.Core.Contracts;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using Serilog;
+// ReSharper disable All
 
 namespace Hermes.Protocol.Gpx.Core.Services
 {
@@ -36,16 +39,16 @@ namespace Hermes.Protocol.Gpx.Core.Services
             {
                 var d = date.Date.ToString(new CultureInfo("ru-Ru"));
                 var tid = ((long)id).ToString();
-                var poinsApi = string.Empty;
-                var cacheApi = string.Empty;
+                var pointsApi = _configuration["way"];
+                var cacheApi = _configuration["cache"];
 
                 switch (type)
                 {
-                    case 1:        
-                        poinsApi += $"tr?id={tid}&date={d}";            
+                    case 1:                        
+                        pointsApi += $"tr?id={tid}&date={d}";            
                         break;                    
                     case 2:
-                        poinsApi += $"ta?id={tid}&date={d}";
+                        pointsApi += $"ta?id={tid}&date={d}";
                         break;
                     default:
                         throw new NotImplementedException();
@@ -53,13 +56,12 @@ namespace Hermes.Protocol.Gpx.Core.Services
 
                 using (var client = new WebClient())
                 {
-                    _logger.Information($"получение маршрутных точек траспортного  средства {id} на дату {d}");
-                    var array = client.DownloadData(poinsApi);
+                    var array = client.DownloadData(pointsApi);
                     var json = Encoding.UTF8.GetString(array);
-                    var pointsList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<double>>(json);
+                    var pointsList = JsonConvert.DeserializeObject<List<double>>(json);
                     if (pointsList.Count == 0)
                     {
-                        argument.Result = pointsList;
+                        argument.Result = pointsList.Cast<object>().ToList();
                         _logger.Warning($"запланированных точек для посещения {d} транспортным средством {id} не обнаружено");
                     }
                     else
@@ -71,7 +73,7 @@ namespace Hermes.Protocol.Gpx.Core.Services
                         {
                             try
                             {
-                                var url = $"{cacheApi}/{t}";
+                                var url = $"{cacheApi}{t}";
                                 array = client.DownloadData(url);
                                 json = Encoding.UTF8.GetString(array);
                                 var point = DeliveryPointCache.FromJson(json);
@@ -80,7 +82,6 @@ namespace Hermes.Protocol.Gpx.Core.Services
                             catch (Exception e)
                             {
                                 _logger.Warning(e, $"возникла ошибка при получении данных точки {t}{ e.Message}");
-                                continue;
                             }
                         }
                         argument.Result = result;
