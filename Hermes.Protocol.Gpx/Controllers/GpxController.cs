@@ -30,14 +30,17 @@ namespace Hermes.Protocol.Gpx.Controllers
                                                               Request.Headers.TryGetValue("transport_type", out var transportType);
                                                               Request.Headers.TryGetValue("event_date", out var eventDate);
                                                               Request.Headers.TryGetValue("x-correlation-id", out var correlation);
+
                                                               var de = DateTime.FromFileTime(long.Parse(eventDate.ToList()[0]));
                                                               var cid = correlation.ToList()[0];
                                                               var id = transportId.ToList()[0];
                                                               var tt = transportType.ToList()[0];
 
                                                               var seq = Configuration["seq"];
-                                                              var sentry = Configuration["sentry"];                                                              
+                                                              var sentry = Configuration["sentry"];                             
+
                                                               var logger = LoggerBootstrap.CreateLogger(id, tt, de, cid,seq,sentry);
+
                                                               logger.Information("begin create request {method}", Request.Method);
                                                               try
                                                               {
@@ -49,19 +52,22 @@ namespace Hermes.Protocol.Gpx.Controllers
                                                                       Context = $"{id}#{tt}#{de.ToFileTime()}"
                                                                   };
                                                                   var protocol = new HermesGpxProtocol(logger, Configuration);
+
                                                                   var result = new Dictionary<string, object>();
+                                                                  
                                                                   protocol.Report += (sender, arg) =>
                                                                       {
-                                                                          logger.Debug("report successfully complete?");
                                                                           arg.With(x => x.Exception.Do(e =>
                                                                               {
                                                                                   logger.Warning(e, e.Message);
+                                                                                  throw e;
                                                                               }));
                                                                           arg.With(x => x.Result.Do(res =>
                                                                           {
                                                                               result.Add("report",res);
                                                                           }));
                                                                       };
+                                                                  
                                                                   protocol.Parsed += (sender, arg) =>
                                                                   {
                                                                       logger.Debug("parser successfully complete?");
@@ -103,8 +109,7 @@ namespace Hermes.Protocol.Gpx.Controllers
             var sentry = Configuration["sentry"];                                                              
             
             var logger = LoggerBootstrap.CreateLogger("GET_TEST", "GET_TEST", DateTime.Now, Guid.NewGuid().ToString(), seq, sentry);
-            logger.Information("create response =>request {method}", Request.Method);
-            
+            logger.Information("create response =>request {method}", Request.Method);            
             var result = new
             {
                 code = HttpStatusCode.OK,
